@@ -24,7 +24,11 @@ let
     when defined(windows):
       getTempDir() / "nimbang"
     else:
-      getHomeDir() / ".cache" / "nimbang"
+      let home = getHomeDir()
+      if dirExists(home): 
+        home / ".cache" / "nimbang"
+      else:
+        getTempDir() / "nimbang"
   nimCacheDir = baseCacheDir / ("nimcache-" & filename.hash.toHex)
 
 if not dirExists(baseCacheDir):
@@ -52,19 +56,22 @@ var
 
 if not exeName.fileExists or filename.fileNewer(exeName):
   var
-    nimArgs = "c"  # default: debug build
+    nimArgs = "c "
     nimbangSettings: seq[string] = @[]  # supported settings: hidedebuginfo
-    showDebugInfo = true
+    showDebugInfo = false
   # Get extra arguments for nim compiler from the second line (it must start with #nimbang-args [args] )
   block:
     for line in filename.lines:
       if line.len == 0 or line[0] != '#':
         break
       if line.startsWith(nimArgsPrefix):
-        nimArgs = line[nimArgsPrefix.len .. ^1]
+        nimArgs &= line[nimArgsPrefix.len .. ^1]
+        if not nimArgs.contains("-d:debug"):
+            nimArgs &= " -d:release"
+        echo nimArgs
       if line.startsWith(nimbangSettingsPrefix):
         nimbangSettings = line[nimbangSettingsPrefix.len .. ^1].strip.toLower.split
-        if "hidedebuginfo" in nimbangSettings: showDebugInfo = false
+        if "showdebuginfo" in nimbangSettings: showDebugInfo = true
         break
 
   exeName.removeFile
@@ -72,8 +79,8 @@ if not exeName.fileExists or filename.fileNewer(exeName):
     nimCacheDir &
     " --out:\"" & exeName & "\" \"" & filename & "\""  # dxbb's patch
   if showDebugInfo:
-    stderr.write "# " & command & "\n"
-    stderr.write "# ---\n"
+    stderr.write "# Running command: " & command & "\n"
+    stderr.write "# ----------------\n"
 
   (output, buildStatus) = execCmdEx(command)
   # Windows file hiding (hopefully, not tested)
