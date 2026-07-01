@@ -1,10 +1,6 @@
-import hashes
-import os
-import osproc
-import strutils
-
+import std/[hashes, os, osproc, strutils]
 when defined(windows):
-  import winlean
+  import std/winlean
 
 const
   nimArgsPrefix = "#nimbang-args "
