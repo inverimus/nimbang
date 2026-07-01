@@ -77,8 +77,8 @@ if not exeName.fileExists or filename.fileNewer(exeName):
         break
 
   exeName.removeFile
-  command = "nim c " & nimArgs & " --colors:on --nimcache:" &
-    nimCacheDir & 
+  command = "nim c " & nimArgs & " --colors:on --nimcache:\"" &
+    nimCacheDir & "\"" &
     " --out:\"" & exeName & "\" \"" & filename & "\""  # dxbb's patch
   if showDebugInfo:
     stderr.write "# Running command: " & command & "\n"
