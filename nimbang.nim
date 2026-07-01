@@ -36,11 +36,7 @@ except OSError:
 
 let
   splitName = filename.splitfile
-  exeName =
-    when defined(windows):
-      nimCacheDir / (splitName.name & ".exe")
-    else:
-      nimCacheDir / (splitName.name)
+  exeName = nimCacheDir / (splitName.name) / (when defined(windows): ".exe" else: "")
 
 # Compilation of script if target doesn't exist
 var
