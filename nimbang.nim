@@ -34,10 +34,7 @@ except OSError:
   echo "Failed to create directory: ", getCurrentExceptionMsg()
   quit(1)
 
-let
-  exeName = nimCacheDir / filename.splitfile.name / (when defined(windows): ".exe" else: "")
-
-# Compilation of script if target doesn't exist
+let exeName = nimCacheDir / filename.splitfile.name & (when defined(windows): ".exe" else: "")
 var
   buildStatus = 0
   output = ""
@@ -46,7 +43,7 @@ var
 if not exeName.fileExists or filename.fileNewer(exeName):
   var
     nimArgs = ""
-    nimbangSettings: seq[string] = @[]  # supported settings: hidedebuginfo
+    nimbangSettings: seq[string] = @[]
     showDebugInfo = false
   # Get extra arguments for nim compiler from the second line (it must start with #nimbang-args [args] )
   block:
