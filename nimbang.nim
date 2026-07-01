@@ -41,12 +41,11 @@ if not dirExists(baseCacheDir):
 # Split the file path and make a new one which is a hidden file on Linux, Windows file hiding comes later
 let
   splitName = filename.splitfile
-  ext =
+  exeName =
     when defined(windows):
-      ".exe"
+      nimCacheDir / (splitName.name & ".exe")
     else:
-      ""
-  exeName = nimCacheDir / ("." & splitName.name & ext)
+      nimCacheDir / ("." & splitName.name)
 
 # Compilation of script if target doesn't exist
 var
@@ -83,9 +82,11 @@ if not exeName.fileExists or filename.fileNewer(exeName):
     stderr.write "# ----------------\n"
 
   (output, buildStatus) = execCmdEx(command)
-  # Windows file hiding (hopefully, not tested)
   when defined(windows):
-    discard execShellCmd("attrib +H " & exeName)
+    let attributes = GetFileAttributesW(newWideCString(exeName))
+    let newAttributes = attributes or 0x2
+    SetFileAttributesW(newWideCString(exeName), newAttributes)
+
 
 # Run the target, or show an error
 if buildStatus == 0:
