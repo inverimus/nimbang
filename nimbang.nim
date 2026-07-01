@@ -1,6 +1,4 @@
 import std/[hashes, os, osproc, strutils]
-when defined(windows):
-  import std/winlean
 
 const
   nimArgsPrefix = "#nimbang-args "
