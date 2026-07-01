@@ -3,6 +3,9 @@ import os
 import osproc
 import strutils
 
+when defined(windows):
+  import winlean
+
 const
   nimArgsPrefix = "#nimbang-args "
   nimbangSettingsPrefix = "#nimbang-settings "
@@ -55,7 +58,7 @@ var
 
 if not exeName.fileExists or filename.fileNewer(exeName):
   var
-    nimArgs = "c "
+    nimArgs = ""
     nimbangSettings: seq[string] = @[]  # supported settings: hidedebuginfo
     showDebugInfo = false
   # Get extra arguments for nim compiler from the second line (it must start with #nimbang-args [args] )
@@ -70,22 +73,24 @@ if not exeName.fileExists or filename.fileNewer(exeName):
         echo nimArgs
       if line.startsWith(nimbangSettingsPrefix):
         nimbangSettings = line[nimbangSettingsPrefix.len .. ^1].strip.toLower.split
-        if "showdebuginfo" in nimbangSettings: showDebugInfo = true
+        showDebugInfo = nimbangSettings.contains("showdebuginfo")
         break
 
   exeName.removeFile
-  command = "nim " & nimArgs & " --colors:on --nimcache:" &
-    nimCacheDir &
+  command = "nim c " & nimArgs & " --colors:on --nimcache:" &
+    nimCacheDir & 
     " --out:\"" & exeName & "\" \"" & filename & "\""  # dxbb's patch
   if showDebugInfo:
     stderr.write "# Running command: " & command & "\n"
     stderr.write "# ----------------\n"
 
-  (output, buildStatus) = execCmdEx(command)
   when defined(windows):
     let attributes = GetFileAttributesW(newWideCString(exeName))
-    let newAttributes = attributes or 0x2
+    let newAttributes = attributes or FILE_ATTRIBUTE_HIDDEN
     SetFileAttributesW(newWideCString(exeName), newAttributes)
+
+  (output, buildStatus) = execCmdEx(command)
+
 
 
 # Run the target, or show an error
