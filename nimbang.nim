@@ -28,12 +28,11 @@ let
         getTempDir() / "nimbang"
   nimCacheDir = baseCacheDir / ("nimcache-" & filename.hash.toHex)
 
-if not dirExists(baseCacheDir):
-  try:
-    createDir(baseCacheDir)
-  except OSError:
-    echo "Failed to create directory: ", getCurrentExceptionMsg()
-    quit(1)
+try:
+  createDir(baseCacheDir)
+except OSError:
+  echo "Failed to create directory: ", getCurrentExceptionMsg()
+  quit(1)
 
 let
   splitName = filename.splitfile
