@@ -16,7 +16,7 @@ if args.len == 0:
   quit(-1)
 
 let
-  filename = args[0].expandFilename
+  filename = expandFilename(args[0])
   baseCacheDir =
     when defined(windows):
       getTempDir() / "nimbang"
@@ -54,13 +54,12 @@ if not exeName.fileExists or filename.fileNewer(exeName):
         nimArgs &= line[nimArgsPrefix.len .. ^1]
         if not nimArgs.contains("-d:debug"):
             nimArgs &= " -d:release"
-        echo nimArgs
       if line.startsWith(nimbangSettingsPrefix):
         nimbangSettings = line[nimbangSettingsPrefix.len .. ^1].strip.toLower.split
         showDebugInfo = nimbangSettings.contains("showdebuginfo")
         break
 
-  exeName.removeFile
+  removeFile(exeName)
   command = "nim c " & nimArgs & " --colors:on --nimcache:\"" &
     nimCacheDir & "\"" &
     " --out:\"" & exeName & "\" \"" & filename & "\""  # dxbb's patch
